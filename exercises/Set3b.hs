@@ -29,6 +29,74 @@ import Mooc.LimitedPrelude
 import Mooc.Todo
 
 
+reverse :: [a] -> [a]
+reverse xs = reverse' xs []
+
+reverse' :: [a] -> [a] -> [a]
+reverse' [] result = result
+reverse' (x:xs) result = reverse' xs (x:result)
+
+(+++) :: [a] -> [a] -> [a]
+(+++) xs ys = sumHelper (reverse xs) ys
+
+sumHelper :: [a] -> [a] -> [a]
+sumHelper [] ys = ys
+sumHelper (x:xs) ys = sumHelper xs (x:ys)
+
+head :: [a] -> a
+head (x:_) = x
+
+tail :: [a] -> [a]
+tail (x:xs) = xs
+
+length0 :: [a] -> Int
+length0 xs = length' xs 0
+
+length' :: [a] -> Int -> Int
+length' [] i = i
+length' (x:xs) i = length' xs (i+1)
+
+map0 :: (a -> b) -> [a] -> [b]
+map0 pred xs = map' pred (reverse xs) []
+
+map' f [] result = result
+map' f (x:xs) result = map' f xs ((f x) : result)
+
+filter0 :: (a -> Bool) -> [a] -> [a]
+filter0 pred xs = filter' pred (reverse xs) []
+
+filter' pred [] result = result
+filter' pred (x:xs) result
+  | pred x == True = filter' pred xs (x:result)
+  | otherwise = filter' pred xs result
+
+concat :: [[a]] -> [a]
+concat xs = concat' (reverse xs) []
+
+concat' :: [[a]] -> [a] -> [a]
+concat' [] result = result
+concat' (x:xs) result = concat' xs (x +++ result)
+
+(!!!) :: [a] -> Int -> a
+(!!!) xs 0 = head xs
+(!!!) xs i = (!!!) (tail xs) (i - 1)
+
+foldlInt :: (Int -> Int -> Int) -> [Int] -> Int
+foldlInt f [] = 0
+foldlInt f (x:[]) = x
+foldlInt f (x:xs) = fold' f xs x 
+
+fold' :: (a -> a -> a) -> [a] -> a -> a
+fold' f [] result = result
+fold' f (x:xs) result = fold' f xs (f result x)
+
+repeat :: a -> Int -> [a]
+repeat x i = repeat' x i []
+
+repeat' :: a -> Int -> [a] -> [a]
+repeat' x 0 result = result
+repeat' x i result = repeat' x (i - 1) (x:result)
+
 ------------------------------------------------------------------------------
 -- Ex 1: given numbers start, count and end, build a list that starts
 -- with count copies of start and ends with end.
@@ -40,7 +108,7 @@ import Mooc.Todo
 --   buildList 7 0 3 ==> [3]
 
 buildList :: Int -> Int -> Int -> [Int]
-buildList start count end = todo
+buildList start count end = (repeat start count) +++ [end]
 
 ------------------------------------------------------------------------------
 -- Ex 2: given i, build the list of sums [1, 1+2, 1+2+3, .., 1+2+..+i]
@@ -50,7 +118,21 @@ buildList start count end = todo
 -- Ps. you'll probably need a recursive helper function
 
 sums :: Int -> [Int]
-sums i = todo
+sums i = sums' [] 1 i
+
+sums' :: [Int] -> Int -> Int -> [Int]
+sums' result counter i
+  | counter > i = reverse result 
+  | otherwise = sums' ((sum counter) : result) (counter + 1) i
+
+sum :: Int -> Int
+sum x = sum' x 1 0
+
+sum' :: Int -> Int -> Int -> Int
+sum' x counter result
+  | x < counter = result
+  | otherwise = sum' x (counter + 1) (result + counter)
+
 
 ------------------------------------------------------------------------------
 -- Ex 3: define a function mylast that returns the last value of the
@@ -64,7 +146,8 @@ sums i = todo
 --   mylast 0 [1,2,3] ==> 3
 
 mylast :: a -> [a] -> a
-mylast def xs = todo
+mylast def [] = def
+mylast def xs = head (reverse xs)
 
 ------------------------------------------------------------------------------
 -- Ex 4: safe list indexing. Define a function indexDefault so that
@@ -85,7 +168,9 @@ mylast def xs = todo
 --   indexDefault ["a","b","c"] (-1) "d" ==> "d"
 
 indexDefault :: [a] -> Int -> a -> a
-indexDefault xs i def = todo
+indexDefault xs i def
+  | (length0 xs) <= i = def
+  | otherwise = xs !!! i
 
 ------------------------------------------------------------------------------
 -- Ex 5: define a function that checks if the given list is in
@@ -94,7 +179,16 @@ indexDefault xs i def = todo
 -- Use pattern matching and recursion to iterate through the list.
 
 sorted :: [Int] -> Bool
-sorted xs = todo
+sorted xs = sorted' xs True
+
+sorted' :: [Int] -> Bool -> Bool
+sorted' [] result = result
+sorted' (x:[]) result = result
+sorted' (x:xs) result = sorted' xs (result && (x <= (head xs)))
+
+(&&) :: Bool -> Bool -> Bool
+(&&) True True = True
+(&&) _ _ = False
 
 ------------------------------------------------------------------------------
 -- Ex 6: compute the partial sums of the given list like this:
