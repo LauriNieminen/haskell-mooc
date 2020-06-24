@@ -97,6 +97,13 @@ repeat' :: a -> Int -> [a] -> [a]
 repeat' x 0 result = result
 repeat' x i result = repeat' x (i - 1) (x:result)
 
+take0 :: Int -> [a] -> [a]
+take0 i xs = take' i xs []
+
+take' :: Int -> [a] -> [a] -> [a]
+take' 0 xs result = result
+take' i (x:xs) result = take' (i - 1) xs (result +++ [x])
+
 ------------------------------------------------------------------------------
 -- Ex 1: given numbers start, count and end, build a list that starts
 -- with count copies of start and ends with end.
@@ -200,7 +207,11 @@ sorted' (x:xs) result = sorted' xs (result && (x <= (head xs)))
 -- Use pattern matching and recursion (and the list constructors : and [])
 
 sumsOf :: [Int] -> [Int]
-sumsOf xs = todo
+sumsOf xs = sumsOf' (reverse xs) []
+
+sumsOf' :: [Int] -> [Int] -> [Int]
+sumsOf' [] result = result
+sumsOf' (x:xs) result =  sumsOf' xs ((foldlInt (+) (x:xs)) : result)
 
 ------------------------------------------------------------------------------
 -- Ex 7: implement the function merge that merges two sorted lists of
@@ -213,7 +224,17 @@ sumsOf xs = todo
 --   merge [1,1,6] [1,2]   ==> [1,1,1,2,6]
 
 merge :: [Int] -> [Int] -> [Int]
-merge xs ys = todo
+merge xs ys = merge' xs ys []
+
+merge' :: [Int] -> [Int] -> [Int] -> [Int]
+merge' [] [] result = result
+merge' [] ys result = result +++ ys
+merge' xs [] result = result +++ xs
+merge' (x:xs) (y:ys) result
+  | x < y = merge' xs (y:ys) (result +++ [x])
+  | otherwise = merge' (x:xs) ys (result +++ [y])
+
+
 
 ------------------------------------------------------------------------------
 -- Ex 8: define the function mymaximum that takes a list and a
@@ -232,7 +253,10 @@ merge xs ys = todo
 --     ==> 2  -- new value is always the biggest, so returns the last
 
 mymaximum :: (a -> a -> Bool) -> a -> [a] -> a
-mymaximum bigger initial xs = todo
+mymaximum bigger initial [] = initial
+mymaximum bigger initial (x:xs)
+  | bigger x initial = mymaximum bigger x xs
+  | otherwise = mymaximum bigger initial xs
 
 ------------------------------------------------------------------------------
 -- Ex 9: define a version of map that takes a two-argument function
@@ -246,7 +270,13 @@ mymaximum bigger initial xs = todo
 -- Use recursion and pattern matching. Do not use any library functions.
 
 map2 :: (a -> b -> c) -> [a] -> [b] -> [c]
-map2 f as bs = todo
+map2 f as bs
+  | length0 as > length0 bs = map2' f (take0 (length0 bs) as) bs []
+  | otherwise = map2' f as (take0 (length0 as) bs) []
+
+map2' :: (a -> b -> c) -> [a] -> [b] -> [c] -> [c]
+map2' f [] [] result = result
+map2' f (x:xs) (y:ys) result = map2' f xs ys (result +++ [(f x y)])
 
 
 ------------------------------------------------------------------------------
@@ -271,4 +301,12 @@ map2 f as bs = todo
 --   ==> []
 
 maybeMap :: (a -> Maybe b) -> [a] -> [b]
-maybeMap f xs = todo
+maybeMap f xs = justGetTheFuckingValues (map0 f xs) []
+
+-- dude just implement maybemap without maybe
+-- shittily implemented restrictions 0/5
+
+justGetTheFuckingValues :: [Maybe a] -> [a] -> [a]
+justGetTheFuckingValues [] result = result
+justGetTheFuckingValues (Nothing:xs) result = justGetTheFuckingValues xs result
+justGetTheFuckingValues (Just x : xs) result = justGetTheFuckingValues xs (result +++ [x])

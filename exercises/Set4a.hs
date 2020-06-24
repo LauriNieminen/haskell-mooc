@@ -36,7 +36,9 @@ import Data.Array
 -- you remove the Eq a => constraint from the type!
 
 allEqual :: Eq a => [a] -> Bool
-allEqual xs = todo
+allEqual [] = True
+allEqual (x:[]) = True
+allEqual (x:y:xs) = (x == y) && allEqual (y : xs)
 
 ------------------------------------------------------------------------------
 -- Ex 2: implement the function distinct which returns True if all
@@ -51,7 +53,16 @@ allEqual xs = todo
 --   distinct [1,2] ==> True
 
 distinct :: Eq a => [a] -> Bool
-distinct = todo
+distinct [] = True
+distinct (x:xs)
+  | isIn x xs = False
+  | otherwise = distinct xs
+
+isIn :: Eq a => a -> [a] -> Bool 
+isIn x [] = False
+isIn x (y:ys)
+  | x == y = True
+  | otherwise = isIn x ys
 
 ------------------------------------------------------------------------------
 -- Ex 3: implement the function middle that returns the middle value
@@ -63,8 +74,8 @@ distinct = todo
 -- Examples:
 --   middle 'b' 'a' 'c'  ==> 'b'
 --   middle 1 7 3        ==> 3
-
-middle = todo
+middle :: Ord a => a-> a-> a -> a
+middle a b c = (sort [a, b, c]) !! 1
 
 ------------------------------------------------------------------------------
 -- Ex 4: return the range of an input list, that is, the difference
@@ -79,8 +90,9 @@ middle = todo
 --   rangeOf [4,2,1,3]          ==> 3
 --   rangeOf [1.5,1.0,1.1,1.2]  ==> 0.5
 
-rangeOf :: [a] -> a
-rangeOf = todo
+rangeOf :: (Ord a, Num a) => [a] -> a
+rangeOf [] = 0
+rangeOf xs = (maximum xs) - (minimum xs)
 
 ------------------------------------------------------------------------------
 -- Ex 5: given a list of lists, return the longest list. If there
@@ -96,7 +108,17 @@ rangeOf = todo
 --   longest [[1,2,3],[4,5],[6]] ==> [1,2,3]
 --   longest ["bcd","def","ab"] ==> "bcd"
 
-longest = todo
+longest :: Ord x => [[x]] -> [x]
+longest (x:xs) = longest' x xs 
+
+longest' :: Ord x => [x] -> [[x]] -> [x]
+longest' x [] = x
+longest' x (y:ys)
+  | length x > length y = longest' x ys
+  | length x < length y = longest' y ys
+  | head x < head y = longest' x ys
+  | otherwise = longest' y ys
+
 
 ------------------------------------------------------------------------------
 -- Ex 6: Implement the function incrementKey, that takes a list of
@@ -112,8 +134,9 @@ longest = todo
 --   incrementKey True [(True,1),(False,3),(True,4)] ==> [(True,2),(False,3),(True,5)]
 --   incrementKey 'a' [('a',3.4)] ==> [('a',4.4)]
 
-incrementKey :: k -> [(k,v)] -> [(k,v)]
-incrementKey = todo
+incrementKey :: (Eq k, Num v) =>  k -> [(k,v)] -> [(k,v)]
+incrementKey k pairs = map (\(first, second) -> if first == k then (first, second + 1)
+                                                                    else (first, second)) pairs
 
 ------------------------------------------------------------------------------
 -- Ex 7: compute the average of a list of values of the Fractional
@@ -128,7 +151,7 @@ incrementKey = todo
 -- length to a Fractional
 
 average :: Fractional a => [a] -> a
-average xs = todo
+average xs = (sum xs) / fromIntegral (length xs)
 
 ------------------------------------------------------------------------------
 -- Ex 8: given a map from player name to score and two players, return
@@ -146,7 +169,9 @@ average xs = todo
 --     ==> "Bob"
 
 winner :: Map.Map String Int -> String -> String -> String
-winner scores player1 player2 = todo
+winner scores player1 player2
+  | (Map.findWithDefault 0 player1 scores) < (Map.findWithDefault 0 player2 scores) = player2
+  | otherwise = player1
 
 ------------------------------------------------------------------------------
 -- Ex 9: compute how many times each value in the list occurs. Return
