@@ -186,7 +186,12 @@ winner scores player1 player2
 --     ==> Map.fromList [(False,3),(True,1)]
 
 freqs :: (Eq a, Ord a) => [a] -> Map.Map a Int
-freqs xs = todo
+freqs xs = foldr (\x result -> (Map.alter adder x result)) Map.empty xs
+
+adder :: Num a => Maybe a -> Maybe a
+adder (Just x) = Just(x+1)
+adder Nothing = Just(1)
+
 
 ------------------------------------------------------------------------------
 -- Ex 10: recall the withdraw example from the course material. Write a
@@ -214,8 +219,15 @@ freqs xs = todo
 --     ==> fromList [("Bob",100),("Mike",50)]
 
 transfer :: String -> String -> Int -> Map.Map String Int -> Map.Map String Int
-transfer from to amount bank = todo
+transfer from to amount bank
+  | (amount >= 0) && (Map.member from bank) && (Map.member to bank) && (amount <= (getIntWithDefault from bank)) = transfer' from to amount bank
+  | otherwise = bank
 
+getIntWithDefault :: String -> Map.Map String Int -> Int
+getIntWithDefault k bank = Map.findWithDefault (-1) k bank
+
+transfer' :: String -> String -> Int -> Map.Map String Int -> Map.Map String Int
+transfer' from to amount bank = Map.adjust (\x -> x + amount) to (Map.adjust (\x -> x - amount) from bank)
 ------------------------------------------------------------------------------
 -- Ex 11: given an Array, find the index of the largest element. You
 -- can assume the Array isn't empty.
@@ -225,4 +237,4 @@ transfer from to amount bank = todo
 -- Hint: check out Data.Array.indices or Data.Array.assocs
 
 maxIndex :: (Ix i, Ord a) => Array i a -> i
-maxIndex = todo
+maxIndex xs = foldr (\idx result -> if (xs ! idx) < (xs ! result) then result else idx) (head (Data.Array.indices xs)) (tail (Data.Array.indices xs))
