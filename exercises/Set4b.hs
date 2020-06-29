@@ -21,7 +21,9 @@ import Mooc.Todo
 countNothings :: [Maybe a] -> Int
 countNothings xs = foldr countHelper 0 xs
 
-countHelper = todo
+countHelper :: Maybe a -> Int -> Int
+countHelper Nothing n = n + 1
+countHelper (Just _) n = n
 
 ------------------------------------------------------------------------------
 -- Ex 2: myMaximum with a fold. Just like in the previous exercise,
@@ -35,7 +37,8 @@ myMaximum :: [Int] -> Int
 myMaximum [] = 0
 myMaximum (x:xs) = foldr maxHelper x xs
 
-maxHelper = todo
+maxHelper :: Int -> Int -> Int
+maxHelper x result = if x > result then x else result
 
 ------------------------------------------------------------------------------
 -- Ex 3: get the first element of a list with a fold. Define
@@ -50,7 +53,9 @@ maxHelper = todo
 myHead :: [a] -> Maybe a
 myHead xs = foldr headHelper Nothing xs
 
-headHelper = todo
+headHelper :: a -> Maybe a -> Maybe a
+headHelper a (Just b) = Just a
+headHelper a Nothing = Just a
 
 ------------------------------------------------------------------------------
 -- Ex 4: get the last element of a list with a fold. Define lasthelper
@@ -65,7 +70,9 @@ headHelper = todo
 myLast :: [a] -> Maybe a
 myLast xs = foldr lastHelper Nothing xs
 
-lastHelper = todo
+lastHelper :: a -> Maybe a -> Maybe a
+lastHelper _ (Just a) = Just a
+lastHelper a Nothing = Just a
 
 ------------------------------------------------------------------------------
 -- Ex 5: compute the sum and length of a list with a fold. Define
@@ -82,8 +89,11 @@ lastHelper = todo
 sumAndLength :: [Double] -> (Double,Int)
 sumAndLength xs = foldr slHelper slStart xs
 
-slStart = todo
-slHelper = todo
+slStart :: (Double, Int)
+slStart = (0.0, 0)
+
+slHelper :: Double -> (Double, Int) -> (Double, Int)
+slHelper x (sum, len) = (sum + x, len + 1)
 
 ------------------------------------------------------------------------------
 -- Ex 6: implement concat with with a fold. Define concatHelper and
@@ -97,8 +107,11 @@ slHelper = todo
 myConcat :: [[a]] -> [a]
 myConcat xs = foldr concatHelper concatStart xs
 
-concatStart = todo
-concatHelper = todo
+concatStart :: [a]
+concatStart = []
+
+concatHelper :: [a] -> [a] -> [a]
+concatHelper xs result = xs ++ result 
 
 ------------------------------------------------------------------------------
 -- Ex 7: get all occurrences of the largest number in a list with a
@@ -112,5 +125,10 @@ concatHelper = todo
 largest :: [Int] -> [Int]
 largest xs = foldr largestHelper [] xs
 
-largestHelper = todo
+largestHelper :: Int -> [Int] -> [Int]
+largestHelper x [] = [x]
+largestHelper x ys
+  | x == (head ys) = ys ++ [x]
+  | x > (head ys) = [x]
+  | otherwise = ys
 
